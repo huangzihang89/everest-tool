@@ -102,6 +102,7 @@ if not check_and_install_dependencies():
 # ============== 正式导入 ==============
 import csv
 import getpass
+import io
 import json
 import os
 import re
@@ -640,12 +641,33 @@ def main():
         api_key = get_api_key()
         csv_file = get_csv_file()
 
-        # 2. 读取 CSV 文件
+        # 2. 读取 CSV 文件（自动检测编码：优先 UTF-8，回退 GBK）
         print(f"\n正在读取文件: {csv_file}")
-        with open(csv_file, 'r', encoding='utf-8-sig') as f:
-            reader = csv.reader(f)
-            headers = next(reader)
-            rows = list(reader)
+
+        # 尝试多种编码
+        encodings_to_try = ['utf-8-sig', 'utf-8', 'gbk', 'gb2312', 'gb18030', 'latin-1']
+        file_content = None
+        used_encoding = None
+
+        for encoding in encodings_to_try:
+            try:
+                with open(csv_file, 'r', encoding=encoding) as f:
+                    file_content = f.read()
+                    used_encoding = encoding
+                    debug_print(f"成功使用 {encoding} 编码读取文件")
+                    break
+            except UnicodeDecodeError:
+                debug_print(f"编码 {encoding} 失败，尝试下一个...")
+                continue
+
+        if file_content is None:
+            print("错误: 无法识别文件编码，请将文件另存为 UTF-8 格式")
+            sys.exit(1)
+
+        # 解析 CSV
+        reader = csv.reader(io.StringIO(file_content))
+        headers = next(reader)
+        rows = list(reader)
 
         print(f"  共 {len(rows)} 行数据")
         print(f"  列名: {headers}")
