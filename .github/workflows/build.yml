@@ -1,3 +1,4 @@
+
   name: Build Executable
 
   on:
@@ -33,7 +34,7 @@
           path: dist/Everest_Tool.exe
 
     build-macos-intel:
-      runs-on: macos-13
+      runs-on: macos-15-intel
       steps:
       - name: Checkout code
         uses: actions/checkout@v4
