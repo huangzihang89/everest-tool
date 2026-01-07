@@ -615,11 +615,31 @@ def get_api_key() -> str:
     print("\n" + "=" * 60)
     print("Validity Everest API - CSV 批量域名查询工具")
     print("=" * 60)
-    api_key = getpass.getpass("\n请输入您的 API Key (输入时不会显示): ")
-    if not api_key.strip():
+
+    # Windows 上 getpass 不支持 Ctrl+V 粘贴，需要特殊处理
+    if sys.platform == 'win32':
+        print("\n提示: Windows 用户请直接粘贴 API Key（输入时会显示）")
+        print("      或使用右键粘贴（而非 Ctrl+V）")
+        api_key = input("请输入您的 API Key: ")
+    else:
+        api_key = getpass.getpass("\n请输入您的 API Key (输入时不会显示): ")
+
+    # 清理 API Key：去除所有不可见字符、BOM、零宽空格等
+    # 只保留 ASCII 可打印字符（API Key 通常只包含字母数字和少量符号）
+    api_key = api_key.strip()
+    # 移除 BOM 和其他不可见字符
+    api_key = api_key.replace('\ufeff', '')  # BOM
+    api_key = api_key.replace('\u200b', '')  # 零宽空格
+    api_key = api_key.replace('\r', '').replace('\n', '')  # 换行符
+    # 只保留可打印 ASCII 字符
+    api_key = ''.join(c for c in api_key if 32 <= ord(c) < 127)
+
+    if not api_key:
         print("错误: API Key 不能为空")
         sys.exit(1)
-    return api_key.strip()
+
+    debug_print(f"API Key 长度: {len(api_key)}, 前4位: {api_key[:4]}...")
+    return api_key
 
 
 def get_csv_file() -> str:
