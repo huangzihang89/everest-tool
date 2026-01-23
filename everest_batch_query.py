@@ -116,10 +116,10 @@ import requests
 
 # ============== 配置 ==============
 API_BASE_URL = "https://api.everest.validity.com/api/2.0"
-REQUEST_INTERVAL = 0.15  # 请求间隔（秒），500次/分钟 ≈ 每次0.12秒，留点余量
+REQUEST_INTERVAL = float(os.getenv("EVEREST_REQUEST_INTERVAL", "0.5"))  # 请求间隔（秒），默认约 120次/分钟
 TIMEOUT = 30  # 请求超时时间（秒）
-MAX_RETRIES = 3  # 最大重试次数
-RETRY_DELAY = 0.5  # 重试等待时间（秒）
+MAX_RETRIES = int(os.getenv("EVEREST_MAX_RETRIES", "2"))  # 最大重试次数（默认仅重试一次）
+RETRY_DELAY = float(os.getenv("EVEREST_RETRY_DELAY", "8.0"))  # 重试等待时间（秒）
 PROGRESS_FILE_SUFFIX = ".progress.json"  # 进度文件后缀
 DEBUG_MODE = True  # 调试模式开关
 
